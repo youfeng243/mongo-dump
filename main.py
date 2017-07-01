@@ -143,14 +143,15 @@ def execute_dump_task():
             dump_date_tmp_path = dump_tmp_path + date + "/"
             run_cmd("mkdir -p {path}".format(path=dump_date_tmp_path))
 
+            cmd = "mongodump -h {host}:{port} -d {db} -c {table}  -u {user} -p {password} -o {path} -q \'{\"$and\":[{\"_utime\":{\"$gte\":\"{start_time}\"}}, {\"_utime\":{\"$lte\":\"{end_time}\"}}]}\'"
+
+            log.info(cmd)
             # 开始执行导出任务
-            run_cmd(
-                "mongodump -h {host}:{port} -d {db} -c {table}  -u {user} -p {password} -o {path} -q '{\"$and\":[{\"_utime\":{\"$gte\":\"{start_time}\"}}, {\"_utime\":{\"$lte\":\"{end_time}\"}}]}'"
-                    .format(table=app_data_table, path=dump_date_tmp_path,
-                            start_time=start_time, end_time=end_time,
-                            host=app_data_config["host"], port=app_data_config["port"],
-                            db=app_data_config["db"], user=app_data_config["username"],
-                            password=app_data_config["password"]))
+            run_cmd(cmd.format(table=app_data_table, path=dump_date_tmp_path,
+                               start_time=start_time, end_time=end_time,
+                               host=app_data_config["host"], port=app_data_config["port"],
+                               db=app_data_config["db"], user=app_data_config["username"],
+                               password=app_data_config["password"]))
 
             # 移动文件
             target_path = dump_path + date + "/"
