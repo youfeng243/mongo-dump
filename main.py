@@ -58,7 +58,7 @@ def remove_all_task():
         data_sync.drop(dump_table_name)
 
     log.info("删除所有表成功, 开始休眠10s")
-    time.sleep(10)
+    exit()
 
 
 # 记录导出文件状态
