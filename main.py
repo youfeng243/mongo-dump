@@ -144,6 +144,12 @@ def execute_dump_task():
             dump_date_tmp_path = dump_tmp_path + date + "/"
             run_cmd("mkdir -p {path}".format(path=dump_date_tmp_path))
 
+            # 删除已经存在的数据
+            run_cmd("rm -rf {source}/{db_path}/{table}*".format(
+                source=dump_date_tmp_path,
+                db_path=app_data_config["db"],
+                table=app_data_table))
+
             cmd = "./mongodump -h " + app_data_config["host"] + ":" + str(app_data_config["port"]) + " -d " + \
                   app_data_config[
                       "db"] + " -c " + app_data_table + " -u " + app_data_config["username"] + " -p " + app_data_config[
