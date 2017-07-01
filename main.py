@@ -28,10 +28,18 @@ data_sync = MongDb(data_sync_config['host'], data_sync_config['port'], data_sync
                    data_sync_config['username'],
                    data_sync_config['password'], log=log)
 
+TABLE_CONFIG = "table.config"
+
 
 # 获得所有的表信息
 def get_all_table_name():
-    return app_data.collection_names()
+    table_set = set()
+    with open(TABLE_CONFIG) as p_file:
+        for line in p_file:
+            table_name = line.strip().strip("\n").strip("\r").split(".")[0]
+            table_set.add(table_name)
+
+    return list(table_set)
 
 
 # 运行命令
@@ -205,6 +213,13 @@ def ensure_index():
 
 def main():
     # remove_all_task()
+
+    # table_list = get_all_table_name()
+    # log.info(len(table_list))
+    # for name in table_list:
+    #     log.info(name)
+    #
+    # time.sleep(10)
 
     while True:
         start_time = time.time()
