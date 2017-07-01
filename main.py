@@ -159,7 +159,8 @@ def execute_dump_task():
             #             password=app_data_config["password"])
             log.info(cmd)
             # 开始执行导出任务
-            run_cmd(cmd)
+            result = run_cmd(cmd)
+            log.info(result)
 
             # 移动文件
             target_path = dump_path + date + "/"
