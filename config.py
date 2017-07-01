@@ -29,11 +29,16 @@ data_sync_config = {
 sleep_time = 1800
 
 # 校验周期
-check_period = 3
-
+check_period = 5
 
 # 记录表前置标识
 dump_table_flag = "dump_"
 
 # 数据导出路径
 dump_path = "/home/nfs/server-download-dir/mongodb-dump/"
+
+# 数据导出临时文件夹
+dump_tmp_path = "/home/nfs/dump-export-tmp/"
+
+# 导出状态文件名
+dump_status_file_name = "status.txt"
