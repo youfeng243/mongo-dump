@@ -59,11 +59,9 @@ def run_cmd(cmd):
 
 # 删除所有任务
 def remove_all_task():
-    table_list = get_all_table_name()
-
-    for app_data_table in table_list:
-        dump_table_name = dump_table_flag + app_data_table
-        data_sync.drop(dump_table_name)
+    for table_name in data_sync.collection_names():
+        if dump_table_flag in table_name:
+            data_sync.drop(table_name)
 
     log.info("删除所有表成功, 开始休眠10s")
     exit()
