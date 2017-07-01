@@ -316,9 +316,8 @@ class MongDb(object):
                 if insert:
                     bulk.insert(item)
                 else:
-                    item_copy = item.copy()
-                    _id = item_copy.pop('_id')
-                    bulk.find({'_id': _id}).upsert().update({'$set': item_copy})
+                    _id = item.pop('_id')
+                    bulk.find({'_id': _id}).upsert().update({'$set': item})
                 count += 1
             bulk.execute({'w': 0})
             self.log.info('insert_logs: {length}'.format(length=len(data_list)))

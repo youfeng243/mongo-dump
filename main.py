@@ -7,6 +7,7 @@
 @file: main.py
 @time: 2017/7/1 12:27
 """
+import json
 import subprocess
 import sys
 import time
@@ -143,12 +144,19 @@ def execute_dump_task():
             dump_date_tmp_path = dump_tmp_path + date + "/"
             run_cmd("mkdir -p {path}".format(path=dump_date_tmp_path))
 
-            cmd = "mongodump -h {host}:{port} -d {db} -c {table}  -u {user} -p {password} -o {path} -q \'{\"$and\":[{\"_utime\":{\"$gte\":\"{start_time}\"}}, {\"_utime\":{\"$lte\":\"{end_time}\"}}]}\'" \
-                .format(table=app_data_table, path=dump_date_tmp_path,
-                        start_time=start_time, end_time=end_time,
-                        host=app_data_config["host"], port=app_data_config["port"],
-                        db=app_data_config["db"], user=app_data_config["username"],
-                        password=app_data_config["password"])
+            cmd = "./mongodump -h " + app_data_config["host"] + ":" + str(app_data_config["port"]) + " -d " + \
+                  app_data_config[
+                      "db"] + " -c " + app_data_table + " -u " + app_data_config["username"] + " -p " + app_data_config[
+                      "password"] + " -o " + dump_date_tmp_path + " -q "
+            cmd += "'" + json.dumps(
+                {"$and": [{"_utime": {"$gte": start_time}}, {"_utime": {"$lte": end_time}}]}) + "'"
+
+            # cmd = "mongodump -h {host}:{port} -d {db} -c {table}  -u {user} -p {password} -o {path} -q \'{\"$and\":[{\"_utime\":{\"$gte\":\"{start_time}\"}}, {\"_utime\":{\"$lte\":\"{end_time}\"}}]}\'" \
+            #     .format(table=app_data_table, path=dump_date_tmp_path,
+            #             start_time=start_time, end_time=end_time,
+            #             host=app_data_config["host"], port=app_data_config["port"],
+            #             db=app_data_config["db"], user=app_data_config["username"],
+            #             password=app_data_config["password"])
             log.info(cmd)
             # 开始执行导出任务
             run_cmd(cmd)
@@ -169,8 +177,10 @@ def execute_dump_task():
             task_item["finish"] = True
             task_item["updateTime"] = tools.get_now_time()
 
+            # data_sync.find_and_modify(dump_table_name, {"_id": date}, update={"$set": task_item})
+
             # 记录状态
-            data_sync.insert_batch_data(dump_table_name, task_item)
+            data_sync.insert_batch_data(dump_table_name, [task_item])
 
     log.info("导出任务执行完成..")
     end_exec_time = time.time()
