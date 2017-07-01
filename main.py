@@ -90,6 +90,9 @@ def split_dump_task():
 
 # 当前单进程执行导出任务
 def execute_dump_task():
+    log.info("导出任务开始...")
+    start_time = time.time()
+
     table_list = get_all_table_name()
 
     for period in xrange(1, check_period + 1):
@@ -97,6 +100,10 @@ def execute_dump_task():
 
         # 确保批次文件夹是否已经存在
         run_cmd("mkdir -p {path}".format(path=dump_path + date))
+
+    log.info("导出任务执行完成..")
+    end_time = time.time()
+    log.info('导出任务消耗时间: {t}s'.format(t=end_time - start_time))
 
 
 def main():
