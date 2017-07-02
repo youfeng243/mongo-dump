@@ -8,6 +8,7 @@
 @time: 2017/7/1 12:27
 """
 import json
+import os
 import subprocess
 import sys
 import time
@@ -79,6 +80,48 @@ def record_status_file(date, dump_table_list):
             p_file.write(name + ".json" + "\r\n")
 
 
+# 状态检测
+def check_dump_status():
+    log.info("开始进行完成状态检测...")
+
+    table_list = get_all_table_name()
+
+    for period in xrange(1, check_period + 1):
+        # 获得日期信息
+        _id = tools.get_one_day(period)
+
+        # 判断是否已经生产状态检测文件
+        full_path = dump_path + _id + "/"
+        status_file_path = full_path + dump_status_file_name
+        if os.path.exists(status_file_path):
+            continue
+
+        all_finish = True
+        dump_table_list = list()
+
+        for app_data_table in table_list:
+            dump_table_name = dump_table_flag + app_data_table
+            dump_table_list.append(app_data_table)
+
+            search_item = data_sync.find_one(dump_table_name, {"_id": _id})
+            if search_item is None:
+                all_finish = False
+                break
+
+            if "finish" not in search_item:
+                all_finish = False
+                break
+
+            if not search_item["finish"]:
+                all_finish = False
+                break
+
+        if all_finish:
+            record_status_file(_id, dump_table_list)
+
+    log.info("状态检测完成...")
+
+
 # 分解任务
 def split_dump_task():
     log.info("分解任务开始...")
@@ -93,12 +136,8 @@ def split_dump_task():
         # 确保批次文件夹是否已经存在
         run_cmd("mkdir -p {path}".format(path=dump_path + _id))
 
-        all_finish = True
-        dump_table_list = list()
         for app_data_table in table_list:
             dump_table_name = dump_table_flag + app_data_table
-            dump_table_list.append(app_data_table)
-
             search_item = data_sync.find_one(dump_table_name, {"_id": _id})
             if search_item is None:
                 task_item = {
@@ -110,18 +149,7 @@ def split_dump_task():
                     "endTime": tools.get_end_time(_id)
                 }
                 data_sync.insert(dump_table_name, task_item)
-                all_finish = False
                 continue
-
-            if not all_finish:
-                continue
-
-            if not search_item["finish"]:
-                all_finish = False
-
-        # 这里写入导出完成状态文件
-        if all_finish:
-            record_status_file(_id, dump_table_list)
 
     log.info("分解任务执行完成..")
     end_time = time.time()
@@ -227,6 +255,9 @@ def main():
 
         # 执行导出任务
         execute_dump_task()
+
+        # 检测完成状态
+        check_dump_status()
 
         log.info("dump任务执行完成..")
         end_time = time.time()
