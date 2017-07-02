@@ -156,7 +156,7 @@ def execute_dump_task():
             cmd = "./mongoexport -h " + app_data_config["host"] + ":" + str(app_data_config["port"]) + " -d " + \
                   app_data_config[
                       "db"] + " -c " + app_data_table + " -u " + app_data_config["username"] + " -p " + app_data_config[
-                      "password"] + " -o " + dump_date_tmp_path + "/" + app_data_table + ".json" + " -q "
+                      "password"] + " -o " + dump_date_tmp_path + app_data_table + ".json" + " -q "
             cmd += "'" + json.dumps(
                 {"$and": [{"_utime": {"$gte": start_time}}, {"_utime": {"$lte": end_time}}]}) + "'"
 
