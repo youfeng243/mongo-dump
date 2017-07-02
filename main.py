@@ -44,17 +44,15 @@ def get_all_table_name():
 
 # 运行命令
 def run_cmd(cmd):
-    res = ''
     p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     while True:
         line = p.stdout.readline()
-        res += line
+        log.info(line)
         if line:
             sys.stdout.flush()
         else:
             break
     p.wait()
-    return res
 
 
 # 删除所有任务
@@ -78,7 +76,7 @@ def record_status_file(date, dump_table_list):
     # 开始记录状态信息
     with open(status_file_path, mode="w") as p_file:
         for name in dump_table_list:
-            p_file.write(name + ".bson" + "\r\n")
+            p_file.write(name + ".json" + "\r\n")
 
 
 # 分解任务
@@ -151,19 +149,18 @@ def execute_dump_task():
             run_cmd("mkdir -p {path}".format(path=dump_date_tmp_path))
 
             # 删除已经存在的数据
-            run_cmd("rm -rf {source}/{db_path}/{table}*".format(
+            run_cmd("rm -rf {source}/{table}.json".format(
                 source=dump_date_tmp_path,
-                db_path=app_data_config["db"],
                 table=app_data_table))
 
-            cmd = "./mongodump -h " + app_data_config["host"] + ":" + str(app_data_config["port"]) + " -d " + \
+            cmd = "./mongoexport -h " + app_data_config["host"] + ":" + str(app_data_config["port"]) + " -d " + \
                   app_data_config[
                       "db"] + " -c " + app_data_table + " -u " + app_data_config["username"] + " -p " + app_data_config[
-                      "password"] + " -o " + dump_date_tmp_path + " -q "
+                      "password"] + " -o " + dump_date_tmp_path + "/" + app_data_table + ".json" + " -q "
             cmd += "'" + json.dumps(
                 {"$and": [{"_utime": {"$gte": start_time}}, {"_utime": {"$lte": end_time}}]}) + "'"
 
-            # cmd = "mongodump -h {host}:{port} -d {db} -c {table}  -u {user} -p {password} -o {path} -q \'{\"$and\":[{\"_utime\":{\"$gte\":\"{start_time}\"}}, {\"_utime\":{\"$lte\":\"{end_time}\"}}]}\'" \
+            # cmd = "mongoexport -h {host}:{port} -d {db} -c {table}  -u {user} -p {password} -o {path} -q \'{\"$and\":[{\"_utime\":{\"$gte\":\"{start_time}\"}}, {\"_utime\":{\"$lte\":\"{end_time}\"}}]}\'" \
             #     .format(table=app_data_table, path=dump_date_tmp_path,
             #             start_time=start_time, end_time=end_time,
             #             host=app_data_config["host"], port=app_data_config["port"],
@@ -171,20 +168,19 @@ def execute_dump_task():
             #             password=app_data_config["password"])
             log.info(cmd)
             # 开始执行导出任务
-            result = run_cmd(cmd)
-            log.info(result)
+            run_cmd(cmd)
 
             # 移动文件
             target_path = dump_path + date + "/"
             run_cmd("mkdir -p {path}".format(path=target_path))
-            run_cmd("mv -f {source}/{db_path}/{table}.bson {target_path}".format(
-                source=dump_date_tmp_path, db_path=app_data_config["db"],
-                table=app_data_table, target_path=target_path))
+            run_cmd("mv -f {source}/{table}.json {target_path}".format(
+                source=dump_date_tmp_path,
+                table=app_data_table,
+                target_path=target_path))
 
             # 删除文件
-            run_cmd("rm -rf {source}/{db_path}/{table}*".format(
+            run_cmd("rm -rf {source}/{table}.json".format(
                 source=dump_date_tmp_path,
-                db_path=app_data_config["db"],
                 table=app_data_table))
 
             task_item["finish"] = True
