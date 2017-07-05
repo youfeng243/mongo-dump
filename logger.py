@@ -28,7 +28,7 @@ class Logger(object):
         self.log.setLevel(self.level)
 
         handler = TimedRotatingFileHandler(self.file_path, when='H', interval=12, backupCount=5, encoding='utf-8')
-        handler.suffix = "%Y-%m-%d %H.%M.%S.log"
+        handler.suffix = "%Y-%m-%d.log"
 
         # 设置输出格式
         format_log = "%(asctime)s %(threadName)s %(funcName)s %(filename)s:%(lineno)s %(levelname)s %(message)s"
