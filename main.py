@@ -76,8 +76,8 @@ def record_status_file(date, dump_table_list):
     if os.path.exists(status_file_path):
         return
 
-        # 确保文件路径已经存在
-    run_cmd("mkdir -p {path}".format(path=full_path))
+    # 确保批次文件夹是否已经存在
+    run_cmd("mkdir -p {path}".format(path=dump_path + date))
 
     # 开始记录状态信息
     with open(status_file_path, mode="w") as p_file:
@@ -91,13 +91,17 @@ def split_dump_task():
     start_time = time.time()
     table_list = get_all_table_name()
 
+    dump_table_list = list()
+    for app_data_table in table_list:
+        dump_table_list.append(dump_table_flag + app_data_table)
+
     # 生成任务信息
     for period in xrange(1, check_period + 1):
         # 获得日期信息
         _id = tools.get_one_day(period)
 
-        # 确保批次文件夹是否已经存在
-        run_cmd("mkdir -p {path}".format(path=dump_path + _id))
+        # 写入列表信息
+        record_status_file(_id, dump_table_list)
 
         for app_data_table in table_list:
             dump_table_name = dump_table_flag + app_data_table
@@ -127,17 +131,10 @@ def execute_dump_task():
     # 获得全部表信息
     table_list = get_all_table_name()
 
-    dump_table_list = list()
-    for app_data_table in table_list:
-        dump_table_list.append(dump_table_flag + app_data_table)
-
     # 根据日期开始导出数据
     for period in xrange(1, check_period + 1):
         # 获得日期信息
         _id = tools.get_one_day(period)
-
-        # 写入列表信息
-        record_status_file(_id, dump_table_list)
 
         # 遍历表导出
         for app_data_table in table_list:
