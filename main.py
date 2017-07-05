@@ -178,11 +178,11 @@ def execute_dump_task():
             run_cmd("mkdir -p {path}".format(path=dump_date_tmp_path))
 
             # 删除已经存在的数据
-            run_cmd("rm -rf {source}/{table}.json".format(
+            run_cmd("rm -rf {source}{table}.json".format(
                 source=dump_date_tmp_path,
                 table=app_data_table))
             # 删除存在的压缩包
-            run_cmd("rm -rf {source}/{table}.zip".format(
+            run_cmd("rm -rf {source}{table}.zip".format(
                 source=dump_date_tmp_path,
                 table=app_data_table))
 
@@ -208,23 +208,23 @@ def execute_dump_task():
             run_cmd("mkdir -p {path}".format(path=target_path))
 
             # 压缩数据
-            run_cmd("zip {source}/{table}.zip {source}/{table}.json".format(
+            run_cmd("zip {source}{table}.zip {source}{table}.json".format(
                 source=dump_date_tmp_path,
                 table=app_data_table))
 
             # 移动数据
-            run_cmd("mv -f {source}/{table}.zip {target_path}".format(
+            run_cmd("mv -f {source}{table}.zip {target_path}".format(
                 source=dump_date_tmp_path,
                 table=app_data_table,
                 target_path=target_path))
 
             # 删除文件
-            run_cmd("rm -rf {source}/{table}.json".format(
+            run_cmd("rm -rf {source}{table}.json".format(
                 source=dump_date_tmp_path,
                 table=app_data_table))
 
             # 删除存在的压缩包
-            run_cmd("rm -rf {source}/{table}.zip".format(
+            run_cmd("rm -rf {source}{table}.zip".format(
                 source=dump_date_tmp_path,
                 table=app_data_table))
 
