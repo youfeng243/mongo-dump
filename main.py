@@ -162,13 +162,26 @@ def execute_dump_task():
     log.info("导出任务开始...")
     start_exec_time = time.time()
 
+    # 获得全部表信息
     table_list = get_all_table_name()
 
-    for app_data_table in table_list:
-        dump_table_name = dump_table_flag + app_data_table
+    # 根据日期开始导出数据
+    for period in xrange(1, check_period + 1):
+        # 获得日期信息
+        _id = tools.get_one_day(period)
 
-        # 获得未完成的任务列表信息
-        for task_item in data_sync.traverse(dump_table_name, {'finish': False}):
+        for app_data_table in table_list:
+            dump_table_name = dump_table_flag + app_data_table
+
+            task_item = data_sync.find_one(dump_table_name, {'_id': _id})
+            if task_item is None:
+                continue
+
+            if task_item['finish']:
+                continue
+
+            # 获得未完成的任务列表信息
+            # for task_item in data_sync.traverse(dump_table_name, {'finish': False}):
             start_time = task_item["startTime"]
             end_time = task_item["endTime"]
             date = task_item["_id"]
