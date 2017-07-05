@@ -81,6 +81,38 @@ def record_status_file(date, dump_table_list):
             p_file.write(name + ".zip" + "\r\n")
 
 
+# 判断某一天是否已经全部导出完毕
+def check_oneday_status(_id, table_list):
+    # 判断是否已经生产状态检测文件
+    full_path = dump_path + _id + "/"
+    status_file_path = full_path + dump_status_file_name
+    if os.path.exists(status_file_path):
+        return
+
+    all_finish = True
+    dump_table_list = list()
+
+    for app_data_table in table_list:
+        dump_table_name = dump_table_flag + app_data_table
+        dump_table_list.append(app_data_table)
+
+        search_item = data_sync.find_one(dump_table_name, {"_id": _id})
+        if search_item is None:
+            all_finish = False
+            break
+
+        if "finish" not in search_item:
+            all_finish = False
+            break
+
+        if not search_item["finish"]:
+            all_finish = False
+            break
+
+    if all_finish:
+        record_status_file(_id, dump_table_list)
+
+
 # 状态检测
 def check_dump_status():
     log.info("开始进行完成状态检测...")
@@ -91,34 +123,36 @@ def check_dump_status():
         # 获得日期信息
         _id = tools.get_one_day(period)
 
-        # 判断是否已经生产状态检测文件
-        full_path = dump_path + _id + "/"
-        status_file_path = full_path + dump_status_file_name
-        if os.path.exists(status_file_path):
-            continue
-
-        all_finish = True
-        dump_table_list = list()
-
-        for app_data_table in table_list:
-            dump_table_name = dump_table_flag + app_data_table
-            dump_table_list.append(app_data_table)
-
-            search_item = data_sync.find_one(dump_table_name, {"_id": _id})
-            if search_item is None:
-                all_finish = False
-                break
-
-            if "finish" not in search_item:
-                all_finish = False
-                break
-
-            if not search_item["finish"]:
-                all_finish = False
-                break
-
-        if all_finish:
-            record_status_file(_id, dump_table_list)
+        # 判断某天的任务是否已经全部导出
+        check_oneday_status(_id, table_list)
+        # # 判断是否已经生产状态检测文件
+        # full_path = dump_path + _id + "/"
+        # status_file_path = full_path + dump_status_file_name
+        # if os.path.exists(status_file_path):
+        #     continue
+        #
+        # all_finish = True
+        # dump_table_list = list()
+        #
+        # for app_data_table in table_list:
+        #     dump_table_name = dump_table_flag + app_data_table
+        #     dump_table_list.append(app_data_table)
+        #
+        #     search_item = data_sync.find_one(dump_table_name, {"_id": _id})
+        #     if search_item is None:
+        #         all_finish = False
+        #         break
+        #
+        #     if "finish" not in search_item:
+        #         all_finish = False
+        #         break
+        #
+        #     if not search_item["finish"]:
+        #         all_finish = False
+        #         break
+        #
+        # if all_finish:
+        #     record_status_file(_id, dump_table_list)
 
     log.info("状态检测完成...")
 
@@ -248,6 +282,9 @@ def execute_dump_task():
 
             # 记录状态
             data_sync.insert_batch_data(dump_table_name, [task_item])
+
+        # 检测某天任务是否全部完成
+        check_oneday_status(_id, table_list)
 
     log.info("导出任务执行完成..")
     end_exec_time = time.time()
