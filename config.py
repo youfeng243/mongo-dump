@@ -29,7 +29,7 @@ data_sync_config = {
 sleep_time = 1800
 
 # 校验周期
-check_period = 10
+check_period = 80
 
 # 记录表前置标识
 dump_table_flag = "dump_"
