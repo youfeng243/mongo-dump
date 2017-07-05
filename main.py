@@ -78,7 +78,7 @@ def record_status_file(date, dump_table_list):
     # 开始记录状态信息
     with open(status_file_path, mode="w") as p_file:
         for name in dump_table_list:
-            p_file.write(name + ".json" + "\r\n")
+            p_file.write(name + ".zip" + "\r\n")
 
 
 # 状态检测
