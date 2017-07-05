@@ -72,89 +72,17 @@ def record_status_file(date, dump_table_list):
     full_path = dump_path + date + "/"
     status_file_path = full_path + dump_status_file_name
 
-    # 确保文件路径已经存在
+    # 如果文件以及存在 则不再写入
+    if os.path.exists(status_file_path):
+        return
+
+        # 确保文件路径已经存在
     run_cmd("mkdir -p {path}".format(path=full_path))
 
     # 开始记录状态信息
     with open(status_file_path, mode="w") as p_file:
         for name in dump_table_list:
             p_file.write(name + ".zip" + "\r\n")
-
-
-# 判断某一天是否已经全部导出完毕
-def check_oneday_status(_id, table_list):
-    # 判断是否已经生产状态检测文件
-    full_path = dump_path + _id + "/"
-    status_file_path = full_path + dump_status_file_name
-    if os.path.exists(status_file_path):
-        return
-
-    all_finish = True
-    dump_table_list = list()
-
-    for app_data_table in table_list:
-        dump_table_name = dump_table_flag + app_data_table
-        dump_table_list.append(app_data_table)
-
-        search_item = data_sync.find_one(dump_table_name, {"_id": _id})
-        if search_item is None:
-            all_finish = False
-            break
-
-        if "finish" not in search_item:
-            all_finish = False
-            break
-
-        if not search_item["finish"]:
-            all_finish = False
-            break
-
-    if all_finish:
-        record_status_file(_id, dump_table_list)
-
-
-# 状态检测
-def check_dump_status():
-    log.info("开始进行完成状态检测...")
-
-    table_list = get_all_table_name()
-
-    for period in xrange(1, check_period + 1):
-        # 获得日期信息
-        _id = tools.get_one_day(period)
-
-        # 判断某天的任务是否已经全部导出
-        check_oneday_status(_id, table_list)
-        # # 判断是否已经生产状态检测文件
-        # full_path = dump_path + _id + "/"
-        # status_file_path = full_path + dump_status_file_name
-        # if os.path.exists(status_file_path):
-        #     continue
-        #
-        # all_finish = True
-        # dump_table_list = list()
-        #
-        # for app_data_table in table_list:
-        #     dump_table_name = dump_table_flag + app_data_table
-        #     dump_table_list.append(app_data_table)
-        #
-        #     search_item = data_sync.find_one(dump_table_name, {"_id": _id})
-        #     if search_item is None:
-        #         all_finish = False
-        #         break
-        #
-        #     if "finish" not in search_item:
-        #         all_finish = False
-        #         break
-        #
-        #     if not search_item["finish"]:
-        #         all_finish = False
-        #         break
-        #
-        # if all_finish:
-        #     record_status_file(_id, dump_table_list)
-
-    log.info("状态检测完成...")
 
 
 # 分解任务
@@ -199,11 +127,19 @@ def execute_dump_task():
     # 获得全部表信息
     table_list = get_all_table_name()
 
+    dump_table_list = list()
+    for app_data_table in table_list:
+        dump_table_list.append(dump_table_flag + app_data_table)
+
     # 根据日期开始导出数据
     for period in xrange(1, check_period + 1):
         # 获得日期信息
         _id = tools.get_one_day(period)
 
+        # 写入列表信息
+        record_status_file(_id, dump_table_list)
+
+        # 遍历表导出
         for app_data_table in table_list:
             dump_table_name = dump_table_flag + app_data_table
 
@@ -240,13 +176,6 @@ def execute_dump_task():
             cmd += "'" + json.dumps(
                 {"$and": [{"_utime": {"$gte": start_time}}, {"_utime": {"$lte": end_time}}]}) + "'"
 
-            # cmd = "mongoexport -h {host}:{port} -d {db} -c {table}  -u {user} -p {password} -o {path} -q \'{\"$and\":[{\"_utime\":{\"$gte\":\"{start_time}\"}}, {\"_utime\":{\"$lte\":\"{end_time}\"}}]}\'" \
-            #     .format(table=app_data_table, path=dump_date_tmp_path,
-            #             start_time=start_time, end_time=end_time,
-            #             host=app_data_config["host"], port=app_data_config["port"],
-            #             db=app_data_config["db"], user=app_data_config["username"],
-            #             password=app_data_config["password"])
-            # log.info(cmd)
             # 开始执行导出任务
             run_cmd(cmd)
 
@@ -278,13 +207,8 @@ def execute_dump_task():
             task_item["finish"] = True
             task_item["updateTime"] = tools.get_now_time()
 
-            # data_sync.find_and_modify(dump_table_name, {"_id": date}, update={"$set": task_item})
-
             # 记录状态
             data_sync.insert_batch_data(dump_table_name, [task_item])
-
-        # 检测某天任务是否全部完成
-        check_oneday_status(_id, table_list)
 
     log.info("导出任务执行完成..")
     end_exec_time = time.time()
@@ -303,13 +227,6 @@ def ensure_index():
 def main():
     # remove_all_task()
 
-    # table_list = get_all_table_name()
-    # log.info(len(table_list))
-    # for name in table_list:
-    #     log.info(name)
-    #
-    # time.sleep(10)
-
     while True:
         start_time = time.time()
         log.info("开始执行dump任务..")
@@ -322,9 +239,6 @@ def main():
 
         # 执行导出任务
         execute_dump_task()
-
-        # 检测完成状态
-        check_dump_status()
 
         log.info("dump任务执行完成..")
         end_time = time.time()
