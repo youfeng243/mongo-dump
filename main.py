@@ -132,7 +132,7 @@ def execute_dump_task():
     table_list = get_all_table_name()
 
     # 根据日期开始导出数据
-    for period in xrange(1, check_period + 1):
+    for period in xrange(check_period, 0, -1):
         # 获得日期信息
         _id = tools.get_one_day(period)
 
