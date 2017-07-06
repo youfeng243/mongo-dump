@@ -93,7 +93,7 @@ def split_dump_task():
 
     dump_table_list = list()
     for app_data_table in table_list:
-        dump_table_list.append(dump_table_flag + app_data_table)
+        dump_table_list.append(app_data_table)
 
     # 生成任务信息
     for period in xrange(1, check_period + 1):
