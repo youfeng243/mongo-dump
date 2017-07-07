@@ -8,6 +8,7 @@
 @time: 2017/7/1 12:27
 """
 import json
+import os
 import subprocess
 import sys
 import time
@@ -74,11 +75,13 @@ def record_status_file(date, dump_table_list):
     # 已经存在表的信息
     exists_table_set = set()
 
-    with open(status_file_path) as p_file:
-        for line in p_file:
-            file_name = line.strip().strip("\r").strip("\n")
-            table_name = file_name.split(".")[0]
-            exists_table_set.add(table_name)
+    # 读取状态文件信息
+    if os.path.exists(status_file_path):
+        with open(status_file_path) as p_file:
+            for line in p_file:
+                file_name = line.strip().strip("\r").strip("\n")
+                table_name = file_name.split(".")[0]
+                exists_table_set.add(table_name)
 
     # 如果文件以及存在 则不再写入
     # if os.path.exists(status_file_path):
