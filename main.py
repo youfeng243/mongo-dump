@@ -8,7 +8,6 @@
 @time: 2017/7/1 12:27
 """
 import json
-import os
 import subprocess
 import sys
 import time
@@ -72,17 +71,34 @@ def record_status_file(date, dump_table_list):
     full_path = dump_path + date + "/"
     status_file_path = full_path + dump_status_file_name
 
-    # 如果文件以及存在 则不再写入
-    if os.path.exists(status_file_path):
-        return
+    # 已经存在表的信息
+    exists_table_set = set()
 
-    # 确保批次文件夹是否已经存在
-    run_cmd("mkdir -p {path}".format(path=dump_path + date))
+    with open(status_file_path) as p_file:
+        for line in p_file:
+            file_name = line.strip().strip("\r").strip("\n")
+            table_name = file_name.split(".")[0]
+            exists_table_set.add(table_name)
+
+    # 如果文件以及存在 则不再写入
+    # if os.path.exists(status_file_path):
+    #     return
+
+    if len(exists_table_set) <= 0:
+        # 确保批次文件夹是否已经存在
+        run_cmd("mkdir -p {path}".format(path=dump_path + date))
+
+    is_all_in_file = True
+    for table_name in dump_table_list:
+        if table_name not in exists_table_set:
+            is_all_in_file = False
+            break
 
     # 开始记录状态信息
-    with open(status_file_path, mode="w") as p_file:
-        for name in dump_table_list:
-            p_file.write(name + ".zip" + "\r\n")
+    if not is_all_in_file:
+        with open(status_file_path, mode="w") as p_file:
+            for name in dump_table_list:
+                p_file.write(name + ".zip" + "\r\n")
 
 
 # 分解任务
