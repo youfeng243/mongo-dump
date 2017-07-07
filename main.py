@@ -240,25 +240,28 @@ def ensure_index():
 def main():
     # remove_all_task()
 
-    while True:
-        start_time = time.time()
-        log.info("开始执行dump任务..")
+    try:
+        while True:
+            start_time = time.time()
+            log.info("开始执行dump任务..")
 
-        # 分解任务
-        split_dump_task()
+            # 分解任务
+            split_dump_task()
 
-        # 创建索引
-        ensure_index()
+            # 创建索引
+            ensure_index()
 
-        # 执行导出任务
-        execute_dump_task()
+            # 执行导出任务
+            execute_dump_task()
 
-        log.info("dump任务执行完成..")
-        end_time = time.time()
-        log.info('dump任务消耗时间: {t}s'.format(t=end_time - start_time))
+            log.info("dump任务执行完成..")
+            end_time = time.time()
+            log.info('dump任务消耗时间: {t}s'.format(t=end_time - start_time))
 
-        # 休眠时间
-        time.sleep(sleep_time)
+            # 休眠时间
+            time.sleep(sleep_time)
+    except Exception as e:
+        log.exception(e)
 
 
 if __name__ == '__main__':
