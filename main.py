@@ -37,7 +37,7 @@ def get_all_table_name():
     table_set = set()
     with open(TABLE_CONFIG) as p_file:
         for line in p_file:
-            table_name = line.strip().strip("\n").strip("\r").split(".")[0]
+            table_name = line.strip().strip("\r").strip("\n")
             table_set.add(table_name)
 
     return list(table_set)
