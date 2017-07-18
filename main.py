@@ -243,8 +243,8 @@ def ensure_index():
 def main():
     # remove_all_task()
 
-    try:
-        while True:
+    while True:
+        try:
             start_time = time.time()
             log.info("开始执行dump任务..")
 
@@ -263,8 +263,11 @@ def main():
 
             # 休眠时间
             time.sleep(sleep_time)
-    except Exception as e:
-        log.exception(e)
+
+        except Exception as e:
+            log.exception(e)
+            # 休眠时间
+            time.sleep(sleep_time)
 
 
 if __name__ == '__main__':
