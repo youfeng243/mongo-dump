@@ -17,4 +17,6 @@ mkdir -p /home/nfs/dump-export-tmp/mongodb-full-dump/
 
 mkdir -p /home/nfs/server-download-dir/mongodb-dump/mongodb-full-dump
 
-cp -rf /home/nfs/dump-export-tmp/mongodb-full-dump/* /home/nfs/server-download-dir/mongodb-dump/mongodb-full-dump/
+cd /home/nfs/dump-export-tmp/mongodb-full-dump/
+zip app_data.zip -r app_data/
+mv app_data.zip /home/nfs/server-download-dir/mongodb-dump/mongodb-full-dump/
