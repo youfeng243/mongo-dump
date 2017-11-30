@@ -9,4 +9,4 @@
 
 ./mongoimport -d {db} -c {table} --upsert {path}
 
-./mongoexport -h 172.16.215.16:40042 -d app_data -c enterprise_data_gov -u read -p read -o /home/youfeng/dump_data/enterprise_data_gov.json -q '{"$and": [{"_utime": {"$gte": "2017-10-28 09:30:00"}}]}'
+./mongoexport -h 172.16.215.16:40042 -d app_data -c enterprise_data_gov -u work -p haizhi -o /home/youfeng/dump_data/enterprise_data_gov.json -q '{"$and": [{"_utime": {"$gte": "2017-11-30 11:05:00"}}]}'
