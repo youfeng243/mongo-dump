@@ -9,7 +9,7 @@
 
 ./mongoimport -d {db} -c {table} --upsert {path}
 
-./mongoexport -h 172.16.215.16:40042 -d app_data -c enterprise_data_gov -u work -p haizhi -o /home/youfeng/dump_data/enterprise_data_gov.json -q '{"$and": [{"_utime": {"$gte": "2017-11-30 11:05:00"}}]}'
+./mongoexport -h 172.16.215.16:40042 -d app_data -c enterprise_data_gov -u work -p haizhi -o /home/youfeng/dump_data/enterprise_data_gov.json -q '{"$and": [{"_utime": {"$gte": "2017-11-30 14:30:50"}}]}'
 ./mongoexport -h 172.16.215.16:40042 -d app_data -c judgement_wenshu -u work -p haizhi -o /home/youfeng/dump_data/judgement_wenshu.json -q '{"$and": [{"_utime": {"$gte": "2017-11-30 11:00:00"}}]}'
 ./mongoexport -h 172.16.215.16:40042 -d app_data -c court_ktgg -u work -p haizhi -o /home/youfeng/dump_data/court_ktgg.json -q '{"$and": [{"_utime": {"$gte": "2017-11-30 11:00:00"}}]}'
 ./mongoexport -h 172.16.215.16:40042 -d app_data -c baidu_news -u work -p haizhi -o /home/youfeng/dump_data/baidu_news.json -q '{"$and": [{"_utime": {"$gte": "2017-11-30 11:30:00"}}]}'
