@@ -146,7 +146,7 @@ class Dump(object):
                         self.company_data_db.insert_batch_data(target_table, result_list)
                         del result_list[:]
             if find_count <= 0:
-                log.error("当前企业没有搜索到任何信息: {}".format(company))
+                log.error("没有搜索到任何信息: {} {}".format(source_table, company))
             # try:
             #     if replace_company1 == replace_company2:
             #         item = self.app_data_db.find_one(source_table, {'company': replace_company1})
