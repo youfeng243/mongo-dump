@@ -36,6 +36,12 @@ log = Logger('export_data.log').get_logger()
 CONFIG_FOLDER_PATH = './table_list'
 DUMP_DATA_FOLDER_PATH = './dum_list'
 
+SEARCH_KEY = {
+    'enterprise_data_gov': 'company',
+    'judgement_wenshu': 'litigant_list',
+    'court_ktgg': 'litigant_list',
+}
+
 
 class Dump(object):
     def __init__(self, config_folder_path, dump_data_folder_path):
@@ -51,6 +57,8 @@ class Dump(object):
 
         self.config_folder_path = config_folder_path
         self.dump_data_folder_path = dump_data_folder_path
+
+        self.search_key = SEARCH_KEY
 
         # 获得配置文件列表
         self.file_list = self.get_file_list(config_folder_path)
@@ -118,29 +126,50 @@ class Dump(object):
     def copy_data_to_dump_table(self, company_list, source_table, target_table):
         count = 0
         log.info("开始复制数据...")
+        result_list = []
         for company in company_list:
             count += 1
             replace_company1, replace_company2 = self.get_replace_name(company)
-            try:
-                if replace_company1 == replace_company2:
-                    item = self.app_data_db.find_one(source_table, {'company': replace_company1})
-                    if item is not None:
-                        self.company_data_db.insert(target_table, item)
-                    else:
-                        log.error("当前企业没有搜索到任何信息: {}".format(company))
-                else:
-                    item1 = self.app_data_db.find_one(source_table, {'company': replace_company1})
-                    if item1 is not None:
-                        self.company_data_db.insert(target_table, item1)
-                    item2 = self.app_data_db.find_one(source_table, {'company': replace_company2})
-                    if item2 is not None:
-                        self.company_data_db.insert(target_table, item2)
-                    if item1 is None and item2 is None:
-                        log.error("当前企业没有搜索到任何信息: {}".format(company))
+            search_list = []
+            if replace_company1 == replace_company2:
+                search_list.append(replace_company1)
+            else:
+                search_list.append(replace_company1)
+                search_list.append(replace_company2)
+
+            find_count = 0
+            for search_name in search_list:
+                for item in self.app_data_db.traverse(source_table, {self.search_key[source_table]: search_name}):
+                    find_count += 1
+                    result_list.append(item)
+                    if len(result_list) >= 500:
+                        self.company_data_db.insert_batch_data(target_table, result_list)
+                        del result_list[:]
+            if find_count <= 0:
+                log.error("当前企业没有搜索到任何信息: {}".format(company))
+            # try:
+            #     if replace_company1 == replace_company2:
+            #         item = self.app_data_db.find_one(source_table, {'company': replace_company1})
+            #         if item is not None:
+            #             self.company_data_db.insert(target_table, item)
+            #         else:
+            #             log.error("当前企业没有搜索到任何信息: {}".format(company))
+            #     else:
+            #         item1 = self.app_data_db.find_one(source_table, {'company': replace_company1})
+            #         if item1 is not None:
+            #             self.company_data_db.insert(target_table, item1)
+            #         item2 = self.app_data_db.find_one(source_table, {'company': replace_company2})
+            #         if item2 is not None:
+            #             self.company_data_db.insert(target_table, item2)
+            #         if item1 is None and item2 is None:
+            #             log.error("当前企业没有搜索到任何信息: {}".format(company))
+            if count % 100 == 0:
                 log.info("当前进度: count = {}".format(count))
-            except Exception as e:
-                log.error("数据迁移错误: compnay = {}".format(company))
-                log.exception(e)
+                # except Exception as e:
+                #     log.error("数据迁移错误: compnay = {}".format(company))
+                #     log.exception(e)
+        if len(result_list) >= 0:
+            self.company_data_db.insert_batch_data(target_table, result_list)
         log.info("数据复制完成: {} {}".format(source_table, target_table))
 
     # 运行命令
@@ -159,22 +188,28 @@ class Dump(object):
 
     # 开始dump数据
     def dump_data(self, dump_table_name, table_name):
-        cmd = self.export_full_path + " -h " + company_data_conf["host"] + ":" + str(
-            company_data_conf["port"]) + " -d " + \
-              company_data_conf[
-                  "db"] + " -c " + dump_table_name + " -u " + company_data_conf["username"] + " -p " + \
-              company_data_conf[
-                  "password"] + " -o " + self.dump_data_folder_path + '/' + table_name + ".json"
-        self.run_cmd(cmd)
+        count = self.company_data_db.select_count(dump_table_name)
+        log.info("当前导出数据量为: table_name = {} count = {}".format(table_name, count))
+        if count > 0:
+            cmd = self.export_full_path + " -h " + company_data_conf["host"] + ":" + str(
+                company_data_conf["port"]) + " -d " + \
+                  company_data_conf[
+                      "db"] + " -c " + dump_table_name + " -u " + company_data_conf["username"] + " -p " + \
+                  company_data_conf[
+                      "password"] + " -o " + self.dump_data_folder_path + '/' + table_name + ".json"
+            self.run_cmd(cmd)
+        return count
 
     # 压缩数据
     def zip_data(self, table_name, dump_data_folder_path):
         try:
-            self.run_cmd("zip {}/{}.zip {}.json".format(
-                dump_data_folder_path,
-                table_name,
-                dump_data_folder_path + '/' + table_name))
-            log.info("压缩数据完成: {}".format(table_name))
+            zip_path = '{}/{}.zip'.format(dump_data_folder_path, table_name)
+            json_path = '{}.json'.format(dump_data_folder_path + '/' + table_name)
+            if os.path.exists(json_path):
+                self.run_cmd("zip {} {}".format(zip_path, json_path))
+                log.info("压缩数据完成: {}".format(table_name))
+            else:
+                log.error("当前路径json文件不存在不进行压缩: {}".format(json_path))
         except Exception as e:
             log.error("压缩数据失败: table_name = {}".format(table_name))
             log.exception(e)
