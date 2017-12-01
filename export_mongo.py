@@ -4,7 +4,7 @@
 @author: youfeng
 @email: youfeng243@163.com
 @license: Apache Licence
-@file: export_data.py
+@file: export_mongo.py
 @time: 2017/12/1 21:29
 """
 import os
