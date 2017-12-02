@@ -43,6 +43,7 @@ SEARCH_KEY = {
     'judge_process': 'litigant_list',
     'zhixing_info': 'i_name',
     'bulletin': 'litigant_list',
+    'baidu_news': 'keyword',
 }
 
 
