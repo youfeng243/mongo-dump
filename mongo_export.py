@@ -40,6 +40,9 @@ SEARCH_KEY = {
     'enterprise_data_gov': 'company',
     'judgement_wenshu': 'litigant_list',
     'court_ktgg': 'litigant_list',
+    'judge_process': 'litigant_list',
+    'zhixing_info': 'i_name',
+    'bulletin': 'litigant_list',
 }
 
 
