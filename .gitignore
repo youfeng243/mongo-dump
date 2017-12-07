@@ -21,3 +21,4 @@ task/gsxt/gsxt_hunan_worker.pyc
 log/*.file
 /config/proxies_200.txt
 /log/
+/dump_list/

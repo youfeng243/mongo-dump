@@ -34,7 +34,7 @@ log = Logger('export_data.log').get_logger()
 
 # 配置文件文件夹
 CONFIG_FOLDER_PATH = './table_list'
-DUMP_DATA_FOLDER_PATH = './dum_list'
+DUMP_DATA_FOLDER_PATH = './dump_list'
 
 SEARCH_KEY = {
     'enterprise_data_gov': 'company',
