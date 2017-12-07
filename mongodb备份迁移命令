@@ -13,3 +13,6 @@
 ./mongoexport -h 172.16.215.16:40042 -d app_data -c judgement_wenshu -u work -p haizhi -o /home/youfeng/dump_data/judgement_wenshu.json -q '{"litigant_list":"兰州虹盛商贸（集团）有限公司"}'
 ./mongoexport -h 172.16.215.16:40042 -d app_data -c court_ktgg -u work -p haizhi -o /home/youfeng/dump_data/court_ktgg.json -q '{"$and": [{"_utime": {"$gte": "2017-11-30 11:00:00"}}]}'
 ./mongoexport -h 172.16.215.16:40042 -d app_data -c baidu_news -u work -p haizhi -o /home/youfeng/dump_data/baidu_news.json -q '{"$and": [{"_utime": {"$gte": "2017-12-01 17:00:00"}}]}'
+
+
+/ssd/mongodb/bin/mongoexport -h 172.16.215.2:40042 -d crawl_data -c online_crawl_gansu_new -u work -p haizhi -o /home/work/mongodb_dump_data
