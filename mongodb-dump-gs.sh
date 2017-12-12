@@ -8,7 +8,7 @@ target_path=/home/nfs/server-download-dir/mongodb-dump/mongodb-full-dump
 
 chmod +x mongodump
 mkdir -p ${dump_path}
-./mongodump -h 172.16.215.16:40042 -d app_data -c enterprise_data_gov  -u read -p read -o ${dump_path}
+./mongodump -h 172.16.215.16:40042 -d app_data -c enterprise_data_gov  -u work -p haizhi -o ${dump_path}
 mkdir -p ${target_path}
 
 cd ${dump_path}
