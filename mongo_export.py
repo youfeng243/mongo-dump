@@ -24,11 +24,11 @@ app_data_conf = {
 
 # company_data 海致配置
 company_data_conf = {
-    'host': '172.16.215.2',
-    'port': 40042,
+    'host': 'mongo2',
+    'port': 27017,
     'db': 'company_data',
-    'username': 'work',
-    'password': 'haizhi',
+    'username': None,
+    'password': None,
 }
 log = Logger('export_data.log').get_logger()
 
@@ -37,12 +37,21 @@ CONFIG_FOLDER_PATH = './table_list'
 DUMP_DATA_FOLDER_PATH = './dump_list'
 
 SEARCH_KEY = {
+    'investment_events': 'pull_full_name',
+    'annual_reports': 'company',
     'enterprise_data_gov': 'company',
-    'judgement_wenshu': 'litigant_list',
-    'court_ktgg': 'litigant_list',
-    'judge_process': 'litigant_list',
-    'zhixing_info': 'i_name',
+    'net_loan_blacklist': 'name',
     'bulletin': 'litigant_list',
+    'judgement_wenshu': 'litigant_list',
+    'judge_process': 'litigant_list',
+    'court_ktgg': 'litigant_list',
+    'penalty': 'accused_people',
+    'patent': 'submitter',
+    'bid_detail': ['win_bid_company', 'public_bid_company'],
+    'land_auction': 'bid_organization',
+    'zhixing_info': 'i_name',
+    'xiaoqu_lianjia': ['developer', 'property'],
+    'shixin_info': 'i_name',
     'baidu_news': 'keyword',
 }
 
@@ -143,12 +152,22 @@ class Dump(object):
 
             find_count = 0
             for search_name in search_list:
-                for item in self.app_data_db.traverse(source_table, {self.search_key[source_table]: search_name}):
-                    find_count += 1
-                    result_list.append(item)
-                    if len(result_list) >= 500:
-                        self.company_data_db.insert_batch_data(target_table, result_list)
-                        del result_list[:]
+                search_key = self.search_key.get(source_table)
+                if isinstance(search_key, basestring):
+                    key_list = [search_key]
+                elif isinstance(search_key, list):
+                    key_list = search_key
+                else:
+                    log.error('查询关键字 source_table {} search_key: {} 异常'.format(source_table, search_key))
+                    return
+
+                for key in key_list:
+                    for item in self.app_data_db.traverse(source_table, {key: search_name}):
+                        find_count += 1
+                        result_list.append(item)
+                        if len(result_list) >= 500:
+                            self.company_data_db.insert_batch_data(target_table, result_list)
+                            del result_list[:]
             if find_count <= 0:
                 log.error("没有搜索到任何信息: {} {}".format(source_table, company))
             # try:
@@ -195,12 +214,19 @@ class Dump(object):
         count = self.company_data_db.select_count(dump_table_name)
         log.info("当前导出数据量为: table_name = {} count = {}".format(table_name, count))
         if count > 0:
-            cmd = self.export_full_path + " -h " + company_data_conf["host"] + ":" + str(
-                company_data_conf["port"]) + " -d " + \
-                  company_data_conf[
-                      "db"] + " -c " + dump_table_name + " -u " + company_data_conf["username"] + " -p " + \
-                  company_data_conf[
-                      "password"] + " -o " + self.dump_data_folder_path + '/' + table_name + ".json"
+            username = company_data_conf.get('username')
+            password = company_data_conf.get('password')
+            if username is not None and password is not None:
+                cmd = self.export_full_path + " -h " + company_data_conf["host"] + ":" + str(
+                    company_data_conf["port"]) + " -d " + \
+                      company_data_conf[
+                          "db"] + " -c " + dump_table_name + " -u " + username + " -p " + \
+                      password + " -o " + self.dump_data_folder_path + '/' + table_name + ".json"
+            else:
+                cmd = self.export_full_path + " -h " + company_data_conf["host"] + ":" + str(
+                    company_data_conf["port"]) + " -d " + \
+                      company_data_conf[
+                          "db"] + " -c " + dump_table_name + " -o " + self.dump_data_folder_path + '/' + table_name + ".json"
             self.run_cmd(cmd)
         return count
 
@@ -210,7 +236,10 @@ class Dump(object):
             zip_path = '{}/{}.zip'.format(dump_data_folder_path, table_name)
             json_path = '{}.json'.format(dump_data_folder_path + '/' + table_name)
             if os.path.exists(json_path):
+                # 压缩json文件
                 self.run_cmd("zip {} {}".format(zip_path, json_path))
+                # 删除json文件
+                self.run_cmd("rm {}".format(json_path))
                 log.info("压缩数据完成: {}".format(table_name))
             else:
                 log.error("当前路径json文件不存在不进行压缩: {}".format(json_path))
