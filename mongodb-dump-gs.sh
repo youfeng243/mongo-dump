@@ -11,7 +11,7 @@ mkdir -p ${dump_path}
 ./mongodump -h 172.16.215.16:40042 -d app_data -c enterprise_data_gov  -u work -p haizhi -o ${dump_path}
 mkdir -p ${target_path}
 
-cd ${dump_path}
-zip app_data.zip -r app_data/
-mv app_data.zip ${target_path}
+cd ${dump_path}/app_data/
+zip enterprise_data_gov.zip -r *enterprise_data_gov*
+mv enterprise_data_gov.zip ${target_path}
 echo "完成dump"
