@@ -8,10 +8,12 @@ target_path=/home/nfs/server-download-dir/mongodb-dump/mongodb-full-dump
 
 chmod +x mongodump
 mkdir -p ${dump_path}
-./mongodump -h mongo6:40042 -d app_data -c judgement_wenshu --authenticationDatabase admin -u root -p haizhi@123 -o ${dump_path}
-mkdir -p ${target_path}
+./mongodump -h 172.16.215.16:40042 -d app_data -c judgement_wenshu  -u work -p haizhi --gzip -o ${dump_path}
+./mongodump -h 172.16.215.16:40042 -d app_data -c land_project_selling  -u work -p haizhi --gzip -o ${dump_path}
+./mongodump -h 172.16.215.16:40042 -d app_data -c investment_events  -u work -p haizhi --gzip -o ${dump_path}
+# mkdir -p ${target_path}
 
-cd ${dump_path}
-zip judgement_wenshu.zip -r app_data/
-mv judgement_wenshu.zip ${target_path}
-echo "完成judgement_wenshu dump"
+#cd ${dump_path}
+#zip judgement_wenshu.zip -r app_data/
+#mv judgement_wenshu.zip ${target_path}
+#echo "完成judgement_wenshu dump"
