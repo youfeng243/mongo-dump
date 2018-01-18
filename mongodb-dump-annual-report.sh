@@ -9,7 +9,7 @@ target_dump_path=/home/nfs/dump-export-tmp/mongodb-full-dump/
 
 chmod +x mongodump
 mkdir -p ${dump_path}
-./mongodump -h 172.16.215.16:40042 -d app_data -c annual_reports  -u work -p haizhi -o ${dump_path} --query '{"$and": [{"_utime": {"$gte": "2018-01-18 17:00:00"}}]}'
+./mongodump -h 172.16.215.16:40042 -d app_data -c annual_reports  -u work -p haizhi -o ${dump_path}
 echo "dump数据完成.."
 
 cd ${dump_path}/app_data/
@@ -21,4 +21,6 @@ echo "远程复制完成.."
 
 ssh -nf cs5 "cd ${target_dump_path}; mv ${target_dump_path}annual_reports.zip ${target_path}"
 echo "远程移动文件完成.."
+rm -rf *annual_reports*
+echo "删除文件完成.."
 echo "完成dump"
