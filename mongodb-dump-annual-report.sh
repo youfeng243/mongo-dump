@@ -12,7 +12,7 @@ mkdir -p ${dump_path}
 ./mongodump -h 172.16.215.16:40042 -d app_data -c annual_reports  -u work -p haizhi -o ${dump_path}
 echo "dump数据完成.."
 
-cd ${dump_path}/app_data/
+cd ${dump_path}app_data/
 zip annual_reports.zip -r *annual_reports*
 echo "数据压缩完成.."
 
