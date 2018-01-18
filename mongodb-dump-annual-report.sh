@@ -3,7 +3,7 @@
 
 set -ex
 
-dump_path=/home/youfeng/mongodb-dump/
+dump_path=/ssd/mongodb-dump/
 
 chmod +x mongodump
 mkdir -p ${dump_path}
