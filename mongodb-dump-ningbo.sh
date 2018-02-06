@@ -15,4 +15,5 @@ mkdir -p ${dump_path}
 ./mongodump -h 172.16.215.16:40042 -d app_data -c zhejiang_ningbo_zhaobiao_all  -u work -p haizhi -o ${dump_path}
 ./mongodump -h 172.16.215.16:40042 -d app_data -c zhejiang_ningbo_zhongbiao_1000w  -u work -p haizhi -o ${dump_path}
 ./mongodump -h 172.16.215.16:40042 -d app_data -c zhejiang_ningbo_zhongbiao_500w  -u work -p haizhi -o ${dump_path}
-zip ningbo_dump.zip -r ningbo_dump_list/
+cd ningbo_dump_list/
+zip ningbo_dump.zip -r app_data/
